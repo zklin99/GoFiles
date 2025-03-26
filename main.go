@@ -1,11 +1,10 @@
 package main
 
 import (
-	"log"
-	"os"
-	"path/filepath"
-
 	"github.com/gin-gonic/gin"
+	"log"
+	"net/http"
+	"os"
 )
 
 func root(c *gin.Context) {
@@ -19,18 +18,20 @@ type fileInfo struct {
 }
 
 func getFtpFolder(c *gin.Context) {
-	ftpFolderDir, err := os.ReadDir("./ftp_folder")
+	path := c.DefaultQuery("path", "/")
+	path = "./ftp_folder" + path
+	ftpFolderDir, err := os.ReadDir(path)
 	if err != nil {
 		log.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 	log.Printf(
-		"ftp_folder: %v, 文件数量：%d",
+		"ftp_folder: %v, 文件数量：%d\n",
 		ftpFolderDir, len(ftpFolderDir),
 	)
 
 	files := make([]fileInfo, 0, len(ftpFolderDir))
 
-	print(files)
 	for _, file := range ftpFolderDir {
 		_fileInfo := fileInfo{
 			Name:  file.Name(),
@@ -40,9 +41,9 @@ func getFtpFolder(c *gin.Context) {
 	}
 
 	c.IndentedJSON(200, files)
-	path := filepath.Dir("./ftp_folder")
+	//path := filepath.Dir("./ftp_folder")
+	return
 
-	c.String(200, path)
 }
 
 func main() {
@@ -53,8 +54,14 @@ func main() {
 	log.Printf("当前目录为：%v", dir)
 
 	r := gin.Default()
+
+	//r.Use(gin.Recovery())
+
 	r.GET("/", root)
-	r.GET("/ftp_folder", getFtpFolder)
+	r.GET("/ftp", getFtpFolder)
+	r.GET("/panic", func(c *gin.Context) {
+		panic("触发Panic")
+	})
 	err = r.Run("0.0.0.0:13939")
 
 	if err != nil {
