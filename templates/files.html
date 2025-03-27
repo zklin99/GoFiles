@@ -14,7 +14,7 @@
     {{ range .files }}
     <li>
         {{ if .IsDir }}📁{{ else }}📄{{ end }}
-        <a href="/files?path={{ .Path }}">{{ .Name }}</a> 修改时间：{{ .ModTime }}
+        <a href="/files?path={{ .Path }}">{{ .Name }}</a>
     </li>
     {{ end }}
 </ul>
