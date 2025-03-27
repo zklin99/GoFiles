@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>{{ .header }}</h1>
+
+<!-- 条件判断 -->
+{{ if .files }}
+<ul>
+    <!-- 循环 -->
+    {{ range .files }}
+    <li>
+        {{ if .IsDir }}📁{{ else }}📄{{ end }}
+        <a href="/files?path={{ .Path }}">{{ .Name }}</a> 修改时间：{{ .ModTime }}
+    </li>
+    {{ end }}
+</ul>
+{{ else }}
+<div>{{ .error }}</div>
+{{ end }}
+</body>
+</html>
