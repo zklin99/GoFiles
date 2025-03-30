@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+{{ template "head" . }}
 <body>
 <h1>{{ .header }}</h1>
 
@@ -14,7 +11,7 @@
     {{ range .files }}
     <li>
         {{ if .IsDir }}📁{{ else }}📄{{ end }}
-        <a href="/files?path={{ .Path }}">{{ .Name }}</a>
+        <a href="/files?path={{ .Path }}">{{ .Name }}  {{ toKB .Size }}KB  {{ .ModTime.Format "2006-01-02 15:04:05" }}</a>
     </li>
     {{ end }}
 </ul>

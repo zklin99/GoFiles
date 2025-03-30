@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"html/template"
 	"log"
 	"net/http"
 	"net/url"
@@ -10,14 +11,15 @@ import (
 )
 
 func root(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.html", gin.H{})
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"title":  "文件浏览器",
+		"header": "根目录",
+	})
 }
 
 type fileInfo struct {
-	Name  string `json:"name"`
-	size  int64
-	IsDir bool `json:"is_dir"`
-	Path  string
+	Path string
+	os.FileInfo
 }
 
 func getFtpFolder(c *gin.Context) {
@@ -67,12 +69,14 @@ func getFtpFolder(c *gin.Context) {
 	files := make([]fileInfo, 0, len(ftpFolderDir))
 
 	for _, file := range ftpFolderDir {
-		_fileInfo := fileInfo{
-			Name:  file.Name(),
-			IsDir: file.IsDir(),
-			Path:  path1 + file.Name(),
+		fileInfo1, err := file.Info()
+		if err != nil {
+			log.Println(err)
 		}
-		files = append(files, _fileInfo)
+
+		files = append(files, fileInfo{
+			path1 + fileInfo1.Name(), fileInfo1,
+		})
 	}
 
 	c.HTML(http.StatusOK, "files.html", gin.H{
@@ -81,6 +85,10 @@ func getFtpFolder(c *gin.Context) {
 		"files":  files,
 	})
 
+}
+
+func toKB(i int64) float32 {
+	return float32(i) / 1024.0
 }
 
 func main() {
@@ -92,6 +100,10 @@ func main() {
 
 	r := gin.Default()
 
+	r.SetFuncMap(template.FuncMap{
+		"toKB": toKB,
+	})
+	r.LoadHTMLGlob("templates/*")
 	//r.Use(gin.Recovery())
 
 	r.GET("/", root)
@@ -99,7 +111,7 @@ func main() {
 	r.GET("/panic", func(c *gin.Context) {
 		panic("触发Panic")
 	})
-	r.LoadHTMLGlob("templates/*")
+
 	err = r.Run("0.0.0.0:13939")
 
 	if err != nil {
