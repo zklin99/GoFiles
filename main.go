@@ -38,6 +38,7 @@ func getFtpFolder(c *gin.Context) {
 	if !pathInfo.IsDir() {
 		fileName := pathInfo.Name()
 		fileSize := pathInfo.Size()
+		lastModified := pathInfo.ModTime().UTC().Format(http.TimeFormat)
 		log.Printf("提供文件下载: %s, 文件大小: %d 字节", path, fileSize)
 		// URL编码文件名以支持中文
 		encodedFileName := url.QueryEscape(fileName)
@@ -47,6 +48,7 @@ func getFtpFolder(c *gin.Context) {
 		c.Header("Content-Transfer-Encoding", "binary")
 		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"; filename*=UTF-8''%s", fileName, encodedFileName))
 		c.Header("Content-Type", "application/octet-stream")
+		c.Header("Last-Modified", lastModified) // 确保更新后不下载到缓存文件
 		c.File(path)
 		return
 	}
