@@ -46,7 +46,11 @@ func getFtpFolder(c *gin.Context) {
 		// 设置头信息让浏览器下载文件
 		c.Header("Content-Description", "File Transfer")
 		c.Header("Content-Transfer-Encoding", "binary")
-		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"; filename*=UTF-8''%s", fileName, encodedFileName))
+		c.Header("Content-Disposition",
+			fmt.Sprintf(
+				"attachment; filename=\"%s\"; filename*=UTF-8''%s",
+				fileName, encodedFileName),
+		)
 		c.Header("Content-Type", "application/octet-stream")
 		c.Header("Last-Modified", lastModified) // 确保更新后不下载到缓存文件
 		c.File(path)
